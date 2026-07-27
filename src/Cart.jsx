@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect } from "react";
 const Cart = () => {
 
 const [products, setProducts] = useState([]);
-
+const [searchTerm, setSearchTerm] = useState('');
+const [selectedCategory, setSelectedCategory] = useState("all");
 const symbol = '$';
 
 
@@ -33,27 +34,68 @@ useEffect(() => {
     fetchProducts();
 }, [fetchProducts]);
 
+ const onFormSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const searchValue = formData.get('searchTerm')?.toString().trim() ?? '';
+        setSearchTerm(searchValue);
+        fetchProducts(searchValue);
+    }
+    const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+
+    let url = "https://dummyjson.com/products";
+
+    if (category !== "all") {
+        url = `https://dummyjson.com/products/category/${category}`;
+    }
+
+    fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+            setProducts(data.products || []);
+        })
+        .catch((error) => {
+            console.error("Error fetching category products:", error);
+            setProducts([]);
+        });
+};
+
     return (
         <div className="products-container">
             {/* Sidebar */}
             <div className="sidebar">
                 <div className="sidebar-section">
                     <h3>Search</h3>
-                    <input
-                        type="text"
-                        className="search-input"
-                        placeholder="Search products..."
-                    />
+                    <form onSubmit={(e) => { onFormSubmit(e) }}>
+                        <div className="input-group">
+                                    <input
+                                type="text"
+                                name="searchTerm"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="search-input"
+                                placeholder="Search products..."
+                            />
+                            <button className="btn btn-primary" type="submit">Search</button>
+                            <button className="btn btn-secondary" type="button" onClick={() => {setSearchTerm(''); fetchProducts(''); }}>Clear</button>
+                        </div>
+                    </form>
                 </div>
 
                 <div className="sidebar-section">
                     <h3>Categories</h3>
                     <ul className="category-list">
-                        <li className="active">All Products</li>
-                        <li>Beauty</li>
-                        <li>Fragrances</li>
-                        <li>Furniture</li>
-                        <li>Groceries</li>
+                        <li  className={selectedCategory === "all" ? "active" : ""}
+                             onClick={() => handleCategoryClick("all")}>All Products</li>
+                        <li   className={selectedCategory === "beauty" ? "active" : ""}
+                              onClick={() => handleCategoryClick("beauty")}>Beauty</li>
+                        <li className={selectedCategory === "fragrances" ? "active" : ""}
+                            onClick={() => handleCategoryClick("fragrances")}>Fragrances</li>
+                        <li  className={selectedCategory === "furniture" ? "active" : ""}
+                            onClick={() => handleCategoryClick("furniture")}>Furniture</li>
+                        <li  className={selectedCategory === "groceries" ? "active" : ""}
+                            onClick={() => handleCategoryClick("groceries")} >Groceries</li>
                     </ul>
                 </div>
             </div>
@@ -63,7 +105,7 @@ useEffect(() => {
                 <div className="products-header">
                     <div>
                         <h1>Our Products</h1>
-                        <p>Showing 8 products</p>
+                        <p>Showing {products.length} Products</p>
                     </div>
                     <button className="cart-button">
                         <span className="cart-icon">🛒</span>
