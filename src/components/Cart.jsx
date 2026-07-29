@@ -1,15 +1,18 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import Products from "./Products";
+import Categories from "./Categories";
 
 const Cart = () => {
   const [product, setProduct] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [count, setCount] = useState(0);
   const [search, setSearch] = useState("");
 
-  const addTocart = useCallback(() => {
-    setCount((prev) => prev + 1);
-  }, []);
   const filteredData = product.filter((item) => item.title.toLowerCase().includes(search.toLowerCase()));
+
+  const addTocart = () => {
+    setCount((prev) => prev + 1);
+  };
 
   return (
     <div className="products-container">
@@ -28,13 +31,8 @@ const Cart = () => {
 
         <div className="sidebar-section">
           <h3>Categories</h3>
-          <ul className="category-list">
-            <li className="active">All Products</li>
-            <li>Fragrance</li>
-            <li>Groceries</li>
-            <li>Beauty</li>
-            <li>Furniture</li>
-          </ul>
+
+          <Categories selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
         </div>
       </div>
 
@@ -45,14 +43,21 @@ const Cart = () => {
             <h1>Our Products</h1>
             <p>Showing {filteredData.length} products</p>
           </div>
-          <button className="cart-button">
+          <button type="button" className="cart-button">
             <span className="cart-icon">🛒</span>
             <span className="cart-text">Cart</span>
             <span className="cart-count">{count}</span>
           </button>
         </div>
 
-        <Products addToCart={addTocart} productData={filteredData} setProductData={setProduct} />
+        {/* <Products addToCart={addTocart} productData={filteredData} setProductData={setProduct} /> */}
+        {/* ab category k hisaab say display kr rhay hen tau */}
+        <Products
+          addToCart={addTocart}
+          productData={filteredData}
+          setProductData={setProduct}
+          selectedCategory={selectedCategory}
+        />
       </div>
     </div>
   );
